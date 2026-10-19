@@ -6,6 +6,7 @@ import { createApp } from './app.js';
 import { User } from './models/User.js';
 import { Organization } from './models/Organization.js';
 import { createAccessToken } from './services/tokenService.js';
+import { seedDemoReferrals } from './seed/demoReferrals.js';
 
 const httpServer = http.createServer();
 const io = new Server(httpServer, { cors: { origin: config.CLIENT_ORIGIN, credentials: true }, transports: ['websocket', 'polling'] });
@@ -33,9 +34,9 @@ httpServer.on('request', app);
 
 const start = async () => {
   await mongoose.connect(config.MONGODB_URI);
-  const existing = await Organization.exists({ slug: 'acme' });
-  if (!existing) {
-    const organization = await Organization.create({ name: 'Acme Studio', slug: 'acme' });
+  let organization = await Organization.findOne({ slug: 'acme' });
+  if (!organization) {
+    organization = await Organization.create({ name: 'Acme Studio', slug: 'acme' });
     const adminPassword = process.env.DEMO_ADMIN_PASSWORD ?? 'DemoAdmin123!';
     const userPassword = process.env.DEMO_USER_PASSWORD ?? 'DemoUser123!';
     const bcrypt = await import('bcryptjs');
@@ -46,6 +47,16 @@ const start = async () => {
     const otherOrg = await Organization.create({ name: 'Northstar Labs', slug: 'northstar' });
     await User.create({ name: 'Casey Member', email: 'user@northstar.test', passwordHash: await bcrypt.hash(userPassword, 12), role: 'user', organizationId: otherOrg._id });
     console.info('Demo accounts seeded: admin@acme.test and user@acme.test (passwords in README).');
+  }
+  const [adminUser, memberUser] = await Promise.all([
+    User.findOne({ organizationId: organization._id, email: 'admin@acme.test', role: 'admin' }),
+    User.findOne({ organizationId: organization._id, email: 'user@acme.test', role: 'user' })
+  ]);
+  if (adminUser && memberUser) {
+    const count = await seedDemoReferrals(organization._id, adminUser._id, memberUser._id);
+    if (count > 0) console.info(`Seeded ${count} sample referrals and their activity history in Acme Studio.`);
+  } else {
+    console.warn('Sample referrals were not seeded because the Acme demo users were not found.');
   }
   httpServer.listen(config.PORT, () => console.info(`Referral API listening on http://localhost:${config.PORT}`));
 };
