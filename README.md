@@ -42,6 +42,8 @@ Open [http://localhost:5173](http://localhost:5173). The API runs on [http://loc
 
 Demo accounts are local development conveniences. Change their passwords using `DEMO_ADMIN_PASSWORD` and `DEMO_USER_PASSWORD` before the first seed, and never use demo credentials in a deployed environment.
 
+On startup, the API adds five fictional referrals and matching activity history to Acme once. Existing referrals with those sample email addresses and data in other organizations are left alone.
+
 ## Project checks
 
 ```bash

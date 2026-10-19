@@ -41,7 +41,7 @@ npm run dev
 - Web app: <http://localhost:5173>
 - API health check: <http://localhost:4000/api/health>
 
-The API seeds the demo organizations and accounts the first time it finds no `acme` organization. If you want different demo passwords, set them before the first API startup. Seed data is not intended for production.
+The API seeds the demo organizations and accounts the first time it finds no `acme` organization. When the Acme admin and member accounts exist, it also adds five fictional referrals and matching activity events once. Existing sample emails are skipped, and other organizations are not modified. Set different demo passwords before the first API startup if needed. This seed data is intended for local demos, not production.
 
 ## Demo logins
 
