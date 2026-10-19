@@ -8,7 +8,12 @@ export async function api<T>(path: string, options: RequestInit = {}, retry = tr
   const headers = new Headers(options.headers);
   if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers, credentials: 'include' });
+  } catch {
+    throw new Error('Cannot reach the API server. Start the backend and check its MongoDB connection.');
+  }
   if (response.status === 401 && retry && !path.startsWith('/auth/')) {
     const refreshed = await refreshSession();
     if (refreshed) return api<T>(path, options, false);
