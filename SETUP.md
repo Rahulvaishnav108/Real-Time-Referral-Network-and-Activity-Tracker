@@ -79,9 +79,12 @@ Events emitted to organization members:
 ## Build and typecheck
 
 ```bash
+npm test
 npm run typecheck
 npm run build
 ```
+
+The Vitest unit tests cover JWT authentication middleware behavior and referral request validation. They run without a MongoDB instance; the running API and full referral persistence flow still require MongoDB.
 
 ## Data and production notes
 
