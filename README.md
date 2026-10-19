@@ -45,9 +45,12 @@ Demo accounts are local development conveniences. Change their passwords using `
 ## Project checks
 
 ```bash
+npm test
 npm run typecheck
 npm run build
 ```
+
+`npm test` runs Vitest unit tests for access-token middleware and referral request validation. These focused tests don't require MongoDB.
 
 ## Architecture
 
