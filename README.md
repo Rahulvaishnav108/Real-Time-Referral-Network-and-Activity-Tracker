@@ -40,7 +40,7 @@ Open [http://localhost:5173](http://localhost:5173). The API runs on [http://loc
 | Acme Studio | User | `user@acme.test` | `DemoUser123!` |
 | Northstar Labs | User | `user@northstar.test` | `DemoUser123!` |
 
-Demo accounts are local development conveniences. Change their passwords using `DEMO_ADMIN_PASSWORD` and `DEMO_USER_PASSWORD` before the first seed, and never use demo credentials in a deployed environment.
+Demo accounts are local development conveniences. `DEMO_ADMIN_PASSWORD` and `DEMO_USER_PASSWORD` are used when a demo account is first created; existing account passwords are preserved. Never use demo credentials in a deployed environment.
 
 On startup, the API adds five fictional referrals and matching activity history to Acme once. Existing referrals with those sample email addresses and data in other organizations are left alone.
 

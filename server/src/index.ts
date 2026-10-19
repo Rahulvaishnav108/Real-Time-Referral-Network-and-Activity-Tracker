@@ -37,22 +37,33 @@ const start = async () => {
   let organization = await Organization.findOne({ slug: 'acme' });
   if (!organization) {
     organization = await Organization.create({ name: 'Acme Studio', slug: 'acme' });
-    const adminPassword = process.env.DEMO_ADMIN_PASSWORD ?? 'DemoAdmin123!';
-    const userPassword = process.env.DEMO_USER_PASSWORD ?? 'DemoUser123!';
-    const bcrypt = await import('bcryptjs');
-    await User.create([
-      { name: 'Avery Admin', email: 'admin@acme.test', passwordHash: await bcrypt.hash(adminPassword, 12), role: 'admin', organizationId: organization._id },
-      { name: 'Jordan Member', email: 'user@acme.test', passwordHash: await bcrypt.hash(userPassword, 12), role: 'user', organizationId: organization._id }
-    ]);
-    const otherOrg = await Organization.create({ name: 'Northstar Labs', slug: 'northstar' });
-    await User.create({ name: 'Casey Member', email: 'user@northstar.test', passwordHash: await bcrypt.hash(userPassword, 12), role: 'user', organizationId: otherOrg._id });
-    console.info('Demo accounts seeded: admin@acme.test and user@acme.test (passwords in README).');
   }
-  const [adminUser, memberUser] = await Promise.all([
-    User.findOne({ organizationId: organization._id, email: 'admin@acme.test', role: 'admin' }),
-    User.findOne({ organizationId: organization._id, email: 'user@acme.test', role: 'user' })
-  ]);
-  if (adminUser && memberUser) {
+  const bcrypt = await import('bcryptjs');
+  const adminEmail = 'admin@acme.test';
+  const memberEmail = 'user@acme.test';
+  let accountsCreated = 0;
+
+  let adminUser = await User.findOne({ organizationId: organization._id, email: adminEmail });
+  if (!adminUser) {
+    adminUser = await User.create({ name: 'Avery Admin', email: adminEmail, passwordHash: await bcrypt.hash(process.env.DEMO_ADMIN_PASSWORD ?? 'DemoAdmin123!', 12), role: 'admin', organizationId: organization._id });
+    accountsCreated += 1;
+  }
+  let memberUser = await User.findOne({ organizationId: organization._id, email: memberEmail });
+  if (!memberUser) {
+    memberUser = await User.create({ name: 'Jordan Member', email: memberEmail, passwordHash: await bcrypt.hash(process.env.DEMO_USER_PASSWORD ?? 'DemoUser123!', 12), role: 'user', organizationId: organization._id });
+    accountsCreated += 1;
+  }
+
+  let otherOrg = await Organization.findOne({ slug: 'northstar' });
+  if (!otherOrg) otherOrg = await Organization.create({ name: 'Northstar Labs', slug: 'northstar' });
+  const northstarUser = await User.findOne({ organizationId: otherOrg._id, email: 'user@northstar.test' });
+  if (!northstarUser) {
+    await User.create({ name: 'Casey Member', email: 'user@northstar.test', passwordHash: await bcrypt.hash(process.env.DEMO_USER_PASSWORD ?? 'DemoUser123!', 12), role: 'user', organizationId: otherOrg._id });
+    accountsCreated += 1;
+  }
+  if (accountsCreated > 0) console.info(`Created ${accountsCreated} missing demo account(s). See README for local credentials.`);
+
+  if (adminUser.role === 'admin' && memberUser.role === 'user') {
     const count = await seedDemoReferrals(organization._id, adminUser._id, memberUser._id);
     if (count > 0) console.info(`Seeded ${count} sample referrals and their activity history in Acme Studio.`);
   } else {

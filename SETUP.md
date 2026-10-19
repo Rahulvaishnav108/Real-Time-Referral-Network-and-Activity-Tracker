@@ -41,7 +41,7 @@ npm run dev
 - Web app: <http://localhost:5173>
 - API health check: <http://localhost:4000/api/health>
 
-The API seeds the demo organizations and accounts the first time it finds no `acme` organization. When the Acme admin and member accounts exist, it also adds five fictional referrals and matching activity events once. Existing sample emails are skipped, and other organizations are not modified. Set different demo passwords before the first API startup if needed. This seed data is intended for local demos, not production.
+The API ensures the Acme and Northstar demo organizations and accounts exist at startup. It creates only missing accounts and preserves existing account passwords. Once the Acme admin and member accounts are present, it adds five fictional referrals and matching activity events once. Existing sample emails are skipped, and other organizations are not modified. Set different demo passwords before the accounts are first created. This seed data is intended for local demos, not production.
 
 ## Demo logins
 
