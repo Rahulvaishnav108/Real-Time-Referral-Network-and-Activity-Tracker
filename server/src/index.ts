@@ -1,5 +1,9 @@
 import http from 'node:http';
+import { mkdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Server } from 'socket.io';
 import { config } from './config.js';
 import { createApp } from './app.js';
@@ -31,14 +35,21 @@ io.on('connection', (socket) => socket.emit('connection:ready', { organizationId
 
 const app = createApp(io);
 httpServer.on('request', app);
+let localMongo: MongoMemoryServer | undefined;
 
 const start = async () => {
-  await mongoose.connect(config.MONGODB_URI);
+  let mongoUri = config.MONGODB_URI;
+  if (process.env.LOCAL_MONGO === 'true') {
+    const dbPath = resolve(process.cwd(), '..', '.local-mongo-data');
+    await mkdir(dbPath, { recursive: true });
+    localMongo = await MongoMemoryServer.create({ instance: { dbName: 'referral_network', dbPath } });
+    mongoUri = localMongo.getUri();
+  }
+  await mongoose.connect(mongoUri);
   let organization = await Organization.findOne({ slug: 'acme' });
   if (!organization) {
     organization = await Organization.create({ name: 'Acme Studio', slug: 'acme' });
   }
-  const bcrypt = await import('bcryptjs');
   const adminEmail = 'admin@acme.test';
   const memberEmail = 'user@acme.test';
   let accountsCreated = 0;
@@ -74,6 +85,6 @@ const start = async () => {
 
 start().catch((error: unknown) => { console.error('Startup failed', error); process.exit(1); });
 
-const shutdown = async () => { io.close(); await mongoose.disconnect(); process.exit(0); };
+const shutdown = async () => { io.close(); await mongoose.disconnect(); await localMongo?.stop(); process.exit(0); };
 process.on('SIGINT', () => { void shutdown(); });
 process.on('SIGTERM', () => { void shutdown(); });

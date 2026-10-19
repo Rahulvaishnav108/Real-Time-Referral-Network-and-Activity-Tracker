@@ -26,7 +26,14 @@ See [SETUP.md](SETUP.md) for prerequisites, environment configuration, local dev
 
 ```bash
 npm install
-# Copy server/.env.example to server/.env and configure secrets/database
+# Copy server/.env.example to server/.env
+npm run dev
+```
+
+Local development uses an embedded MongoDB database (`LOCAL_MONGO=true` in your ignored `server/.env`), so Atlas credentials and Docker are not required. Demo accounts, five fictional referrals and matching activity events are seeded automatically. Data persists under `.local-mongo-data/` across restarts. To use standalone MongoDB with Docker instead, set `LOCAL_MONGO=false` and start:
+
+```bash
+docker compose up -d mongo
 npm run dev
 ```
 
