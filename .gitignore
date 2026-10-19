@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.tsbuildinfo
 .env
+.local-mongo-data/
 .DS_Store
 .pdf-tools/
 page-*.png

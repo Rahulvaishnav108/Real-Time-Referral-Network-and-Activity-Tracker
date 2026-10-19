@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Node.js 20 or newer (npm is included)
-- MongoDB 6 or newer, running locally or available through MongoDB Atlas
+- The default local database is embedded; Docker Desktop or MongoDB Atlas is needed only if you choose an external database.
 
 ## Install
 
@@ -15,11 +15,14 @@ npm install
 
 ## Configure the API
 
-Copy `server/.env.example` to `server/.env` and set the values for your environment:
+The ignored local `server/.env` uses embedded MongoDB (`LOCAL_MONGO=true`). On first launch, the MongoDB binary is downloaded automatically; subsequent runs reuse `.local-mongo-data/`. Demo organizations, users, referrals and activity events are seeded at API startup. To use an external database, set `LOCAL_MONGO=false` and configure `MONGODB_URI`.
+
+Copy `server/.env.example` to `server/.env` and configure secrets if needed:
 
 ```dotenv
 PORT=4000
 MONGODB_URI=mongodb://127.0.0.1:27017/referral_network
+LOCAL_MONGO=true
 JWT_ACCESS_SECRET=use-a-random-secret-of-at-least-32-characters
 JWT_REFRESH_SECRET=use-a-different-random-secret-of-at-least-32-characters
 CLIENT_ORIGIN=http://localhost:5173
